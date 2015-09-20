@@ -134,6 +134,14 @@
         return nil;
 }
 
+- (BOOL)allowsMultipleSelection {
+    BOOL allowsMultipleSelection = YES;
+    
+    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerControllerAllowsMultipleSelection:)])
+        allowsMultipleSelection = [self.picker.delegate assetsPickerControllerAllowsMultipleSelection:self.picker];
+    
+    return allowsMultipleSelection;
+}
 
 #pragma mark - Setup
 
@@ -330,10 +338,14 @@
     self.navigationItem.leftBarButtonItem = (self.picker.showsCancelButton) ? self.cancelButton : nil;
     self.navigationItem.rightBarButtonItem = [self isTopViewController] ? self.doneButton : nil;
     
-    if (self.picker.alwaysEnableDoneButton)
-        self.navigationItem.rightBarButtonItem.enabled = YES;
-    else
-        self.navigationItem.rightBarButtonItem.enabled = (self.picker.selectedAssets.count > 0);
+    if ([self allowsMultipleSelection]) {
+        if (self.picker.alwaysEnableDoneButton)
+            self.navigationItem.rightBarButtonItem.enabled = YES;
+        else
+            self.navigationItem.rightBarButtonItem.enabled = (self.picker.selectedAssets.count > 0);
+    } else {
+        self.navigationItem.rightBarButtonItem = nil;
+    }
 }
 
 - (BOOL)isTopViewController
