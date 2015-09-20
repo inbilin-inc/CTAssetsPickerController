@@ -170,4 +170,12 @@
     [self.tableView reloadData];
 }
 
+- (BOOL)assetsPickerControllerAllowsMultipleSelection:(CTAssetsPickerController *)picker {
+    if ([self isMemberOfClass:[CTBasicViewController class]]) {
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 @end

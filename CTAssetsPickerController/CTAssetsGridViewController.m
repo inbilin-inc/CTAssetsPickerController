@@ -46,7 +46,8 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
 
 
 @interface CTAssetsGridViewController ()
-<PHPhotoLibraryChangeObserver>
+<PHPhotoLibraryChangeObserver,
+CTAssetsPageViewControllerPickDelegate>
 
 @property (nonatomic, weak) CTAssetsPickerController *picker;
 @property (nonatomic, strong) PHFetchResult *fetchResult;
@@ -111,6 +112,7 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
     [self setupAssets];
     [self updateTitle:self.picker.selectedAssets];
     [self updateButton:self.picker.selectedAssets];
+    [self updateWhetherOrNotAllowsMultipleSelection];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -160,6 +162,14 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
     return (self.fetchResult.count > 0) ? self.fetchResult[indexPath.item] : nil;
 }
 
+- (BOOL)allowsMultipleSelection {
+    BOOL allowsMultipleSelection = YES;
+    
+    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerControllerAllowsMultipleSelection:)])
+        allowsMultipleSelection = [self.picker.delegate assetsPickerControllerAllowsMultipleSelection:self.picker];
+    
+    return allowsMultipleSelection;
+}
 
 #pragma mark - Setup
 
@@ -359,12 +369,19 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
 
 - (void)updateButton:(NSArray *)selectedAssets
 {
-    if (self.picker.alwaysEnableDoneButton)
-        self.navigationItem.rightBarButtonItem.enabled = YES;
-    else
-        self.navigationItem.rightBarButtonItem.enabled = (self.picker.selectedAssets.count > 0);
+    if ([self allowsMultipleSelection]) {
+        if (self.picker.alwaysEnableDoneButton)
+            self.navigationItem.rightBarButtonItem.enabled = YES;
+        else
+            self.navigationItem.rightBarButtonItem.enabled = (self.picker.selectedAssets.count > 0);
+    } else {
+        self.navigationItem.rightBarButtonItem = nil;
+    }
 }
 
+- (void)updateWhetherOrNotAllowsMultipleSelection {
+    self.collectionView.allowsMultipleSelection = self.allowsMultipleSelection;
+}
 
 #pragma mark - Did de/select asset
 
@@ -402,13 +419,36 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
         CGPoint point           = [longPress locationInView:self.collectionView];
         NSIndexPath *indexPath  = [self.collectionView indexPathForItemAtPoint:point];
         
-        CTAssetsPageViewController *vc = [[CTAssetsPageViewController alloc] initWithFetchResult:self.fetchResult];
-        vc.pageIndex = indexPath.item;
-        
-        [self.navigationController pushViewController:vc animated:YES];
+        [self pushPageViewControllerWithIndexPath:indexPath];
     }
 }
 
+- (void)pushPageViewControllerWithIndexPath:(NSIndexPath *)indexPath {
+    CTAssetsPageViewController *vc = [[CTAssetsPageViewController alloc] initWithFetchResult:self.fetchResult];
+    vc.pickDelegate = self;
+    vc.pageIndex = indexPath.item;
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+#pragma mark - CTAssetsPageViewControllerPickDelegate
+
+- (BOOL)assetsPageViewControllerShouldShowDoneButton:(CTAssetsPageViewController *)assetsPageViewController {
+    return ![self allowsMultipleSelection];
+}
+
+- (void)assetsPageViewController:(CTAssetsPageViewController *)assetsPageViewController didTapDoneButton:(NSInteger)pageIndex {
+    if (![self allowsMultipleSelection] && pageIndex < self.fetchResult.count) {
+        PHAsset *asset = self.fetchResult[pageIndex];
+        
+        [self.picker selectAsset:asset];
+        
+        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)])
+            [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+        
+        [self.picker finishPickingAssets:nil];
+    }
+}
 
 #pragma mark - Reload data
 
@@ -596,6 +636,8 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
     else
         cell.enabled = YES;
     
+    cell.showSelectedIcon = [self allowsMultipleSelection];
+    
     // XXX
     // Setting `selected` property blocks further deselection.
     // Have to call selectItemAtIndexPath too. ( ref: http://stackoverflow.com/a/17812116/1648333 )
@@ -666,12 +708,16 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    PHAsset *asset = [self assetAtIndexPath:indexPath];
-    
-    [self.picker selectAsset:asset];
-    
-    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)])
-        [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+    if ([self allowsMultipleSelection]) {
+        PHAsset *asset = [self assetAtIndexPath:indexPath];
+        
+        [self.picker selectAsset:asset];
+        
+        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)])
+            [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+    } else {
+        [self pushPageViewControllerWithIndexPath:indexPath];
+    }
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
@@ -686,12 +732,14 @@ NSString * const CTAssetsGridViewFooterIdentifier = @"CTAssetsGridViewFooterIden
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    PHAsset *asset = [self assetAtIndexPath:indexPath];
-    
-    [self.picker deselectAsset:asset];
-    
-    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)])
-        [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+    if ([self allowsMultipleSelection]) {
+        PHAsset *asset = [self assetAtIndexPath:indexPath];
+        
+        [self.picker deselectAsset:asset];
+        
+        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)])
+            [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+    }
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath

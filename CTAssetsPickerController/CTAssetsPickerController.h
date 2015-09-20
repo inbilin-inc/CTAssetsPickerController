@@ -324,7 +324,15 @@
  */
 - (void)assetsPickerController:(CTAssetsPickerController *)picker didUnhighlightAsset:(PHAsset *)asset;
 
-
+/**
+ *  Ask the delegate whether or not allows multiple selection.
+ *
+ *  @param picker The controller object managing the assets picker interface.
+ *
+ *  @return whether or not allows multiple selection.
+ *
+ */
+- (BOOL)assetsPickerControllerAllowsMultipleSelection:(CTAssetsPickerController *)picker;
 
 
 /**

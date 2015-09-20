@@ -33,6 +33,7 @@
 @interface CTAssetsGridViewCell : UICollectionViewCell
 
 @property (nonatomic, assign, getter = isEnabled) BOOL enabled;
+@property (nonatomic, assign) BOOL showSelectedIcon;
 
 - (void)bind:(PHAsset *)asset;
 

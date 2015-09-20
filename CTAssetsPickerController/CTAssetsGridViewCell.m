@@ -62,6 +62,7 @@
         self.isAccessibilityElement = YES;
         self.accessibilityTraits    = UIAccessibilityTraitImage;
         self.enabled                = YES;
+        self.showSelectedIcon       = YES;
         
         [self setupViews];
     }

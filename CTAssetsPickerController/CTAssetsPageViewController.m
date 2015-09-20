@@ -27,6 +27,7 @@
 #import "CTAssetsPageViewController.h"
 #import "CTAssetItemViewController.h"
 #import "CTAssetScrollView.h"
+#import "CTAssetsPickerController.h"
 #import "NSNumberFormatter+CTAssetsPickerController.h"
 #import "NSBundle+CTAssetsPickerController.h"
 #import "UIImage+CTAssetsPickerController.h"
@@ -136,6 +137,13 @@
         
         self.pauseButton = pauseButton;
     }
+    
+    if ([self.pickDelegate respondsToSelector:@selector(assetsPageViewControllerShouldShowDoneButton:)] &&
+        [self.pickDelegate assetsPageViewControllerShouldShowDoneButton:self]) {
+        UIImage *doneImage = [UIImage ctassetsPickerImageNamed:@"SelectionDone"];
+        UIBarButtonItem *doneButtonItem = [[UIBarButtonItem alloc] initWithImage:doneImage style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
+        self.navigationItem.rightBarButtonItem = doneButtonItem;
+    }
 }
 
 
@@ -211,7 +219,6 @@
 {
     return ((CTAssetItemViewController *)self.viewControllers[0]).asset;
 }
-
 
 #pragma mark - Page view controller data source
 
@@ -422,5 +429,12 @@
     [((CTAssetItemViewController *)self.viewControllers[0]) pauseAsset:sender];
 }
 
+#pragma mark - Done
+
+- (void)done:(id)sender {
+    if ([self.pickDelegate respondsToSelector:@selector(assetsPageViewController:didTapDoneButton:)]) {
+        [self.pickDelegate assetsPageViewController:self didTapDoneButton:self.pageIndex];
+    }
+}
 
 @end

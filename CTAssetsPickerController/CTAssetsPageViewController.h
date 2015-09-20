@@ -27,9 +27,7 @@
 #import <UIKit/UIKit.h>
 #import <Photos/Photos.h>
 
-
-
-
+@protocol CTAssetsPageViewControllerPickDelegate;
 
 /**
  *  A view controller that shows selected photos and vidoes from user's photo library that let the user navigate the item page by page.
@@ -41,6 +39,7 @@
  */
 @property (nonatomic, assign) NSInteger pageIndex;
 
+@property (nonatomic, weak) id <CTAssetsPageViewControllerPickDelegate> pickDelegate;
 
 /**
  *  @name Creating a Assets Page View Controller
@@ -63,5 +62,12 @@
  *  @return An instance of `CTAssetPageViewController` initialized to show the asset items in `assets`.
  */
 - (instancetype)initWithAssets:(NSArray *)assets;
+
+@end
+
+@protocol CTAssetsPageViewControllerPickDelegate <NSObject>
+
+- (BOOL)assetsPageViewControllerShouldShowDoneButton:(CTAssetsPageViewController *)assetsPageViewController;
+- (void)assetsPageViewController:(CTAssetsPageViewController *)assetsPageViewController didTapDoneButton:(NSInteger)pageIndex;
 
 @end
