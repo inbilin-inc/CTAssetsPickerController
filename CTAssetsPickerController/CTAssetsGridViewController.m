@@ -642,7 +642,7 @@ CTAssetsPageViewControllerPickDelegate>
     else
         cell.enabled = YES;
     
-    cell.showSelectedIcon = [self allowsMultipleSelection];
+    cell.showSelectedMark = [self allowsMultipleSelection];
     
     // XXX
     // Setting `selected` property blocks further deselection.

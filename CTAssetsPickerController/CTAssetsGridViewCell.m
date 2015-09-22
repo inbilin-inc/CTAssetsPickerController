@@ -62,7 +62,7 @@
         self.isAccessibilityElement = YES;
         self.accessibilityTraits    = UIAccessibilityTraitImage;
         self.enabled                = YES;
-        self.showSelectedIcon       = YES;
+        self.showSelectedMark       = YES;
         
         [self setupViews];
     }
@@ -127,7 +127,9 @@
 - (void)setSelected:(BOOL)selected
 {
     [super setSelected:selected];
-    self.selectedView.hidden = !selected;
+    if (self.showSelectedMark) {
+        self.selectedView.hidden = !selected;
+    }
 }
 
 
