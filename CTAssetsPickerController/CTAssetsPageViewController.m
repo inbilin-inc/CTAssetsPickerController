@@ -105,13 +105,27 @@
         return self.isStatusBarHidden;
 }
 
+#pragma mark - Properties
 
+- (UIColor *)primaryColor {
+    if (!_primaryColor) {
+        _primaryColor = [UIColor whiteColor];
+    }
+    return _primaryColor;
+}
+
+- (UIColor *)secondaryColor {
+    if (!_secondaryColor) {
+        _secondaryColor = [UIColor blackColor];
+    }
+    return _secondaryColor;
+}
 
 #pragma mark - Setup
 
 - (void)setupViews
 {
-    self.view.backgroundColor = [UIColor whiteColor];
+    self.view.backgroundColor = self.primaryColor;
 }
 
 - (void)setupButtons
@@ -329,7 +343,7 @@
     
     [UIView animateWithDuration:0.2
                      animations:^{
-                         self.view.backgroundColor = [UIColor whiteColor];
+                         self.view.backgroundColor = self.primaryColor;
                      }];
     
     [self fadeInControls:self.navigationController];
@@ -341,7 +355,7 @@
     
     [UIView animateWithDuration:0.2
                      animations:^{
-                         self.view.backgroundColor = [UIColor blackColor];
+                         self.view.backgroundColor = self.secondaryColor;
                      }];
     
     [self fadeAwayControls:self.navigationController];
@@ -357,8 +371,8 @@
 
 - (void)toogleBackgroundColor:(id)sender
 {
-    UIColor *color = (self.view.backgroundColor == UIColor.whiteColor) ?
-    [UIColor blackColor] : [UIColor whiteColor];
+    UIColor *color = (self.view.backgroundColor == self.primaryColor) ?
+    self.secondaryColor : self.primaryColor;
     
     [UIView animateWithDuration:0.2
                      animations:^{

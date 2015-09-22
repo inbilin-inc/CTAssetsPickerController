@@ -334,6 +334,7 @@
  */
 - (BOOL)assetsPickerControllerAllowsMultipleSelection:(CTAssetsPickerController *)picker;
 
+- (void)assetsPickerController:(CTAssetsPickerController *)picker primaryColor:(UIColor **)primaryColor secondaryColor:(UIColor **)secondColor;
 
 /**
  *  @name Notifications

@@ -54,13 +54,15 @@
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext
 {
     UIView *containerView           = [transitionContext containerView];
-    containerView.backgroundColor   = [UIColor whiteColor];
     
     if (self.operation == UINavigationControllerOperationPush)
     {
         CTAssetsGridViewController *fromVC  = (CTAssetsGridViewController *)[transitionContext viewControllerForKey:UITransitionContextFromViewControllerKey];
         CTAssetsPageViewController *toVC    = (CTAssetsPageViewController *)[transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
         CTAssetItemViewController *iVC      = (CTAssetItemViewController *)toVC.viewControllers[0];
+        
+        containerView.backgroundColor = toVC.primaryColor;
+        
         NSIndexPath *indexPath              = [NSIndexPath indexPathForItem:toVC.pageIndex inSection:0];
         
         UIView *cellView        = [fromVC.collectionView cellForItemAtIndexPath:indexPath];
@@ -93,7 +95,7 @@
         
         // Create the mask
         UIView *mask            = [[UIView alloc] initWithFrame:startBounds];
-        mask.backgroundColor    = [UIColor whiteColor];
+        mask.backgroundColor    = toVC.primaryColor;
 
         // Prepare transition
         snapshot.transform  = CGAffineTransformMakeScale(startScale, startScale);;
@@ -134,6 +136,8 @@
         CTAssetItemViewController *iVC      = (CTAssetItemViewController *)fromVC.viewControllers[0];
         NSIndexPath *indexPath              = [NSIndexPath indexPathForItem:fromVC.pageIndex inSection:0];
         
+        containerView.backgroundColor = fromVC.primaryColor;
+        
         // Scroll to index path
         [toVC.collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionNone animated:NO];
         [toVC.collectionView layoutIfNeeded];
@@ -160,7 +164,7 @@
         CGRect endBounds    = CGRectMake((width-length)/2, (height-length)/2, length, length);
 
         UIView *mask            = [[UIView alloc] initWithFrame:snapshot.bounds];
-        mask.backgroundColor    = [UIColor whiteColor];
+        mask.backgroundColor    = fromVC.primaryColor;
         
         // Prepare transition
         snapshot.transform      = CGAffineTransformMakeScale(startScale, startScale);

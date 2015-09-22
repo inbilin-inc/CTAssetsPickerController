@@ -41,6 +41,10 @@
 
 @property (nonatomic, weak) id <CTAssetsPageViewControllerPickDelegate> pickDelegate;
 
+@property (nonatomic, strong) UIColor *primaryColor;
+
+@property (nonatomic, strong) UIColor *secondaryColor;
+
 /**
  *  @name Creating a Assets Page View Controller
  */

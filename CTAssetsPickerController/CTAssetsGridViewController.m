@@ -427,6 +427,12 @@ CTAssetsPageViewControllerPickDelegate>
     CTAssetsPageViewController *vc = [[CTAssetsPageViewController alloc] initWithFetchResult:self.fetchResult];
     vc.pickDelegate = self;
     vc.pageIndex = indexPath.item;
+    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:primaryColor:secondaryColor:)]) {
+        UIColor *primaryColor, *secondaryColor;
+        [self.picker.delegate assetsPickerController:self.picker primaryColor:&primaryColor secondaryColor:&secondaryColor];
+        vc.primaryColor = primaryColor;
+        vc.secondaryColor = secondaryColor;
+    }
     
     [self.navigationController pushViewController:vc animated:YES];
 }
